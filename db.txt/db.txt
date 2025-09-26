@@ -1,0 +1,110 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE Users (
+    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER USER postgres WITH PASSWORD '0000';
+
+drop table usertests
+alter table Users
+rename username to user_name
+
+select * from Users
+
+insert into users(username)values('john')
+insert into users(username)values('mark')
+insert into users(username)values('luke')
+
+
+CREATE TABLE Groupinfo(
+    group_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    group_name VARCHAR(100) NOT NULL,
+	group_description VARCHAR(100),
+	created_by VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+select * from Groupinfo
+
+insert into Groupinfo(group_name,group_description,created_by) values ('Tech','Tech is always a tech','milton')
+insert into Groupinfo(group_name,group_description,created_by) values ('was','was is always a tech','kumar')
+
+
+CREATE TABLE Groupmember(
+    user_id UUID NOT NULL,
+    group_id VARCHAR(100) NOT NULL,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE table_name
+ADD COLUMN column_name data_type [constraints];
+
+ALTER TABLE groupmember
+ADD CONSTRAINT fk_group_id FOREIGN KEY (group_id) REFERENCES groupinfo(group_id);
+
+ALTER TABLE groupmember
+ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(user_id);
+
+Alter table Groupmember
+alter group_id TYPE UUID USING group_id::uuid;
+
+select * from groupmember
+
+luke
+insert into Groupmember(user_id,group_id)values('717d1d2f-0c51-4c6c-b728-2266b7bef31d','8b8fe0cf-5c0c-4c2a-b73f-eab7d635e3c7')
+insert into Groupmember(user_id,group_id)values('717d1d2f-0c51-4c6c-b728-2266b7bef31d','f1c2e391-907c-49d4-988c-cbdb2502da41')
+mark
+insert into Groupmember(user_id,group_id)values('cc6f200c-9194-4038-a297-dbf8f847486e','8b8fe0cf-5c0c-4c2a-b73f-eab7d635e3c7')
+insert into Groupmember(user_id,group_id)values('cc6f200c-9194-4038-a297-dbf8f847486e','f1c2e391-907c-49d4-988c-cbdb2502da41')
+
+
+list down the userjoingroups
+
+SELECT 
+    g.group_id,
+    g.group_name,
+    g.group_description,
+    g.created_at
+FROM 
+    Groupmember gm
+JOIN 
+    Users u ON gm.user_id = u.user_id
+JOIN 
+    Groupinfo g ON gm.group_id::uuid = g.group_id
+WHERE 
+u.username = 'mark';
+
+CREATE TABLE Expense (
+    expense_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    group_id UUID,
+    Title VARCHAR(100),
+    Amount DECIMAL(10, 2),
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (group_id) REFERENCES Groupinfo(group_id)
+);
+
+select * from expense
+
+CREATE TABLE ExpensePayments (
+    expense_id UUID,
+    user_id UUID,
+    paid_amount DECIMAL(10, 2),
+	ispaid boolean,
+    PRIMARY KEY (expense_id, user_id),
+    FOREIGN KEY (expense_id) REFERENCES Expense(ExpenseID),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+
+CREATE TABLE ExpenseSplit (
+    expense_id UUID,
+    user_id UUID,             
+    OwesAmount DECIMAL(10, 2),
+    PRIMARY KEY (expense_id, user_id),
+    FOREIGN KEY (expense_id) REFERENCES Expense(expense_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
